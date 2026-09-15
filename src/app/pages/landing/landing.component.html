@@ -1,0 +1,81 @@
+<main class="min-h-screen">
+  <!-- Hero -->
+  <section class="px-6 pt-16 pb-12 text-center max-w-2xl mx-auto">
+    <span class="inline-block rounded-full bg-orange-100 dark:bg-orange-900/40 text-[#D85A30] dark:text-orange-300 text-sm font-medium px-4 py-1 mb-6">
+      Sin jerga legal. Sin vueltas.
+    </span>
+    <h1 class="text-4xl sm:text-5xl font-bold text-stone-800 dark:text-stone-100 leading-tight">
+      ¿Firmaste sin leer?
+    </h1>
+    <p class="mt-4 text-lg text-stone-600 dark:text-stone-300">
+      Subí tu contrato de alquiler, gimnasio, seguro o telefonía y te mostramos, en lenguaje simple,
+      qué cláusulas te conviene mirar con lupa antes de firmar.
+    </p>
+  </section>
+
+  <!-- Cómo funciona -->
+  <section class="px-6 pb-12 max-w-3xl mx-auto">
+    <div class="grid sm:grid-cols-3 gap-6 text-center">
+      <div class="flex flex-col items-center gap-2">
+        <div class="h-10 w-10 rounded-full bg-[#D85A30] text-white flex items-center justify-center font-semibold">1</div>
+        <p class="font-medium text-stone-800 dark:text-stone-100">Subí tu contrato</p>
+        <p class="text-sm text-stone-500 dark:text-stone-400">PDF o foto, en segundos.</p>
+      </div>
+      <div class="flex flex-col items-center gap-2">
+        <div class="h-10 w-10 rounded-full bg-[#D85A30] text-white flex items-center justify-center font-semibold">2</div>
+        <p class="font-medium text-stone-800 dark:text-stone-100">Lo analizamos</p>
+        <p class="text-sm text-stone-500 dark:text-stone-400">Buscamos cláusulas de riesgo conocidas.</p>
+      </div>
+      <div class="flex flex-col items-center gap-2">
+        <div class="h-10 w-10 rounded-full bg-[#D85A30] text-white flex items-center justify-center font-semibold">3</div>
+        <p class="font-medium text-stone-800 dark:text-stone-100">Entendé qué firmás</p>
+        <p class="text-sm text-stone-500 dark:text-stone-400">Resumen simple, sin tecnicismos.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Zona de subida -->
+  <section class="px-6 pb-20 max-w-xl mx-auto">
+    <div
+      class="rounded-2xl border-2 border-dashed p-10 text-center transition-colors"
+      [ngClass]="arrastrando() ? 'border-riesgo-alto bg-orange-50 dark:bg-orange-900/20' : 'border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800'"
+      (dragover)="onDragOver($event)"
+      (dragleave)="onDragLeave()"
+      (drop)="onDrop($event)"
+    >
+      <ng-container *ngIf="!cargando(); else cargandoTpl">
+        <p class="text-stone-600 dark:text-stone-300 mb-4">Arrastrá tu contrato acá, o</p>
+        <label
+          class="inline-block cursor-pointer rounded-full bg-[#D85A30] text-white font-medium px-6 py-3 hover:opacity-90 transition"
+        >
+          Elegir archivo
+          <input type="file" accept=".pdf,.jpg,.jpeg,.png" class="hidden" (change)="onFileSelected($event)" />
+        </label>
+        <p class="mt-4 text-xs text-stone-400 dark:text-stone-500">PDF, JPG o PNG · máx. 20MB</p>
+      </ng-container>
+      <ng-template #cargandoTpl>
+        <div class="flex flex-col items-center gap-3 py-2">
+          <div class="w-full max-w-sm h-3 rounded-full bg-stone-200 dark:bg-stone-700 overflow-hidden">
+            <div
+              class="h-full rounded-full bg-[#D85A30] transition-[width] duration-500 ease-out"
+              [style.width.%]="porcentajeProgreso()"
+            ></div>
+          </div>
+          <div class="flex items-center gap-2 text-sm font-medium text-stone-700 dark:text-stone-200 tabular-nums">
+            <span>{{ porcentajeProgreso() }}%</span>
+            <span class="text-stone-300 dark:text-stone-600">·</span>
+            <span>{{ tiempoFormateado() }}</span>
+          </div>
+          <p class="text-stone-600 dark:text-stone-300 text-sm text-center">{{ etiquetaProgreso() }}</p>
+        </div>
+      </ng-template>
+    </div>
+
+    <div class="mt-6" *ngIf="errorLocal() as tipo">
+      <app-error-state [tipo]="tipo" (reintentar)="reintentar()"></app-error-state>
+    </div>
+    <div class="mt-6" *ngIf="!errorLocal() && errorServidor() as tipo">
+      <app-error-state [tipo]="tipo" (reintentar)="reintentar()"></app-error-state>
+    </div>
+  </section>
+</main>

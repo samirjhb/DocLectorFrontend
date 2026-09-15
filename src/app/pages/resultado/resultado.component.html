@@ -1,0 +1,79 @@
+<main class="min-h-screen px-6 py-10 max-w-4xl mx-auto" *ngIf="resultado() as r; else sinResultado">
+  <button (click)="volver()" class="text-sm text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 mb-6">← Analizar otro contrato</button>
+
+  <header class="mb-8">
+    <h1 class="text-2xl font-bold text-stone-800 dark:text-stone-100">Resultado del análisis</h1>
+    <p class="text-stone-500 dark:text-stone-400 text-sm mt-1">{{ r.filename }}</p>
+
+    <div class="mt-4" *ngIf="r.riskCount === 0">
+      <div class="rounded-2xl border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 p-6 text-center">
+        <p class="text-green-700 dark:text-green-300 font-medium">No encontramos cláusulas de riesgo conocidas en este contrato.</p>
+        <p class="text-sm text-green-600 dark:text-green-400 mt-1">Igual, te recomendamos leerlo completo antes de firmar.</p>
+      </div>
+    </div>
+
+    <div class="mt-4 flex gap-4 text-sm" *ngIf="r.riskCount > 0">
+      <span class="inline-flex items-center gap-2 text-stone-600 dark:text-stone-300">
+        <span class="h-3 w-3 rounded-full bg-riesgo-alto"></span>
+        {{ clausulasAlto().length }} de riesgo alto
+      </span>
+      <span class="inline-flex items-center gap-2 text-stone-600 dark:text-stone-300">
+        <span class="h-3 w-3 rounded-full bg-riesgo-advertencia"></span>
+        {{ clausulasAdvertencia().length }} de advertencia
+      </span>
+    </div>
+  </header>
+
+  <section class="grid md:grid-cols-2 gap-8" *ngIf="r.riskCount > 0">
+    <!-- Texto completo con resaltado inline -->
+    <div class="order-2 md:order-1">
+      <h2 class="text-sm font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-3">Contrato completo</h2>
+      <div class="rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-5 max-h-[70vh] overflow-y-auto whitespace-pre-wrap leading-relaxed text-sm text-stone-700 dark:text-stone-300">
+        <ng-container *ngFor="let seg of segmentos()">
+          <span
+            *ngIf="seg.clausula as c; else textoPlano"
+            [ngClass]="c.nivel === 'alto' ? 'bg-riesgo-alto' : 'bg-riesgo-advertencia'"
+            class="rounded px-0.5 text-white cursor-help"
+            [title]="c.explicacion"
+          >{{ seg.texto }}</span>
+          <ng-template #textoPlano>{{ seg.texto }}</ng-template>
+        </ng-container>
+      </div>
+    </div>
+
+    <!-- Tarjetas resumen -->
+    <div class="order-1 md:order-2">
+      <h2 class="text-sm font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-3">Cláusulas detectadas</h2>
+      <div class="space-y-3">
+        <div
+          *ngFor="let c of r.detectedClauses"
+          class="rounded-xl border p-4"
+          [ngClass]="c.nivel === 'alto' ? 'border-orange-200 dark:border-orange-800 bg-orange-50 dark:bg-orange-900/20' : 'border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20'"
+        >
+          <div class="flex items-center gap-2 mb-1">
+            <span
+              class="text-xs font-semibold px-2 py-0.5 rounded-full text-white"
+              [ngClass]="c.nivel === 'alto' ? 'bg-riesgo-alto' : 'bg-riesgo-advertencia'"
+            >
+              {{ c.nivel === 'alto' ? 'Riesgo alto' : 'Advertencia' }}
+            </span>
+            <span class="text-sm font-medium text-stone-700 dark:text-stone-300">{{ c.categoria }}</span>
+          </div>
+          <p class="text-sm text-stone-600 dark:text-stone-400">{{ c.explicacion }}</p>
+          <p class="text-xs text-stone-400 dark:text-stone-500 mt-2 italic">"{{ c.textoEncontrado }}"</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<ng-template #sinResultado>
+  <main class="min-h-screen flex items-center justify-center px-6">
+    <div class="text-center">
+      <p class="text-stone-600 dark:text-stone-300 mb-4">Todavía no analizaste ningún contrato.</p>
+      <button (click)="volver()" class="rounded-full bg-[#D85A30] text-white px-6 py-3 font-medium hover:opacity-90 transition">
+        Analizar un contrato
+      </button>
+    </div>
+  </main>
+</ng-template>
